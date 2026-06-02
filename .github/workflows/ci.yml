@@ -26,14 +26,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+          cache-dependency-path: Batch/pom.xml
 
       - name: Run tests
-        run: |
-          if [ -f pom.xml ]; then
-            mvn test -q
-          else
-            echo "::warning::No hay pom.xml — sube el código fuente al repositorio"
-          fi
+        working-directory: Batch
+        run: ./mvnw -q test
 
   docker-deploy:
     name: Build Docker & Deploy
@@ -55,8 +52,8 @@ jobs:
 
       - name: Build and push to Artifact Registry
         run: |
-          if [ ! -d src ]; then
-            echo "::warning::No hay src/ — sube el código fuente al repositorio"
+          if [ ! -d Batch/src ]; then
+            echo "::warning::No hay Batch/src/ - sube el codigo fuente al repositorio"
             exit 0
           fi
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
@@ -69,7 +66,7 @@ jobs:
 
       - name: Push to GHCR
         run: |
-          if [ ! -d src ]; then exit 0; fi
+          if [ ! -d Batch/src ]; then exit 0; fi
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker tag \
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:latest \
@@ -78,7 +75,7 @@ jobs:
 
       - name: Deploy to GKE
         run: |
-          if [ ! -d src ]; then exit 0; fi
+          if [ ! -d Batch/src ]; then exit 0; fi
           gcloud container clusters get-credentials banquito-cluster --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }}
-          kubectl rollout restart deployment/${{ env.SERVICE }}
+          kubectl set image deployment/${{ env.SERVICE }} ${{ env.SERVICE }}=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }}
           kubectl rollout status deployment/${{ env.SERVICE }} --timeout=120s

@@ -30,7 +30,9 @@ jobs:
 
       - name: Run tests
         working-directory: Batch
-        run: ./mvnw -q test
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -q test
 
   docker-deploy:
     name: Build Docker & Deploy

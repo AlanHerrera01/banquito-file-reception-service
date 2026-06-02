@@ -1,11 +1,11 @@
 services:
   postgres:
-    image: postgres:18-alpine
+    image: postgres:16-alpine
     container_name: banquito-postgres
     environment:
       POSTGRES_DB: file_reception
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123
+      POSTGRES_PASSWORD: "123"
     ports:
       - "5432:5432"
     volumes:
@@ -62,19 +62,21 @@ services:
       POSTGRES_PORT: 5432
       POSTGRES_DB: file_reception
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123
-      POSTGRES_AUTO_CREATE_DB: true
+      POSTGRES_PASSWORD: "123"
+      POSTGRES_AUTO_CREATE_DB: "true"
       POSTGRES_MAINTENANCE_DB: postgres
       MONGO_URI: mongodb://mongo:27017/file_reception
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/file_reception
+      SPRING_MONGODB_URI: mongodb://mongo:27017/file_reception
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
+      RABBITMQ_PORT: "5672"
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
       RABBITMQ_VHOST: /
-      APP_RABBIT_ENABLED: true
+      APP_RABBIT_ENABLED: "true"
       APP_RABBIT_QUEUE: payment.lines.queue
-      MANAGEMENT_HEALTH_RABBIT_ENABLED: true
-      APP_CORE_VALIDATION_ENABLED: false
+      MANAGEMENT_HEALTH_RABBIT_ENABLED: "true"
+      APP_CORE_VALIDATION_ENABLED: "false"
       JPA_DDL_AUTO: update
     ports:
       - "8084:8084"
